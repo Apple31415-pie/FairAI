@@ -556,7 +556,7 @@ namespace FairAI
         {
             if (StartOfRound.Instance != null)
             {
-                if (Can("CheckForPlayersInside"))
+                if (Can("Mobs", "CheckForPlayersInside"))
                 {
                     if (StartOfRound.Instance.shipHasLanded)
                     {
@@ -642,16 +642,26 @@ namespace FairAI
             return false;
         }
 
-        public static bool Can(string identifier)
+        public static bool Can(string parentIdentifier, string identifier)
         {
-            foreach (ConfigDefinition entry in Instance.Config.Keys)
-            {
-                if (RemoveInvalidCharacters(entry.Key.ToUpper()).Equals(RemoveInvalidCharacters(identifier.ToUpper())))
+            if (Instance.Config.ContainsKey(ConfigDefinition(parentIdentifier, identifier))) // Instance.Config is Config file (https://github.com/BepInEx/BepInEx/blob/master/Runtimes/Unity/BepInEx.Unity.Mono/BaseUnityPlugin.cs/ line 35)
+            { // contains key method for ConfigFile (BepInEx v5.4.16) https://docs.bepinex.dev/v5.4.16/api/BepInEx.Configuration.ConfigFile.html#BepInEx_Configuration_ConfigFile_ContainsKey_BepInEx_Configuration_ConfigDefinition_
+                try
                 {
-                    return Instance.Config[entry].BoxedValue.ToString().ToUpper().Equals("TRUE");
+                    ConfigEntry<bool> entry = Instance.Config.GetSetting<bool>(ConfigDefinition(parentIdentifier, identifier));
+                    // GetSetting<T>() getter https://docs.bepinex.dev/v5.4.16/api/BepInEx.Configuration.ConfigFile.html#BepInEx_Configuration_ConfigFile_GetSetting__1_BepInEx_Configuration_ConfigDefinition_
+                    // "if setting exists but has type different than T, an exception is thrown"
+                    return entry.Value;
+                }
+                catch
+                { // if the config is of unexpected type fail closed.
+                    return false;
                 }
             }
-            return false;
+            else
+            { // if the config does not exist fail closed. 
+                return false;
+            }
         }
 
         public static int GetInt(string parentIdentifier, string identifier)
