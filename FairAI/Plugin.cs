@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -644,22 +645,18 @@ namespace FairAI
 
         public static bool Can(string parentIdentifier, string identifier)
         {
-            if (Instance.Config.ContainsKey(ConfigDefinition(parentIdentifier, identifier))) // Instance.Config is Config file (https://github.com/BepInEx/BepInEx/blob/master/Runtimes/Unity/BepInEx.Unity.Mono/BaseUnityPlugin.cs/ line 35)
-            { // contains key method for ConfigFile (BepInEx v5.4.16) https://docs.bepinex.dev/v5.4.16/api/BepInEx.Configuration.ConfigFile.html#BepInEx_Configuration_ConfigFile_ContainsKey_BepInEx_Configuration_ConfigDefinition_
-                try
-                {
-                    ConfigEntry<bool> entry = Instance.Config.GetSetting<bool>(ConfigDefinition(parentIdentifier, identifier));
-                    // GetSetting<T>() getter https://docs.bepinex.dev/v5.4.16/api/BepInEx.Configuration.ConfigFile.html#BepInEx_Configuration_ConfigFile_GetSetting__1_BepInEx_Configuration_ConfigDefinition_
-                    // "if setting exists but has type different than T, an exception is thrown"
+            try
+            {
+                ConfigEntry<bool> entry = null;
+                Instance.Config.TryGetEntry(parentIdentifier, identifier, out entry);
+                // TryGetEntry<T>(ConfigDefinition, out ConfigEntry<T>) https://docs.bepinex.dev/v5.4.16/api/BepInEx.Configuration.ConfigFile.html#BepInEx_Configuration_ConfigFile_TryGetEntry__1_BepInEx_Configuration_ConfigDefinition_BepInEx_Configuration_ConfigEntry___0___
+                if (entry != null)
                     return entry.Value;
-                }
-                catch
-                { // if the config is of unexpected type fail closed.
-                    return false;
-                }
+                // if the config entry was not found fail
+                return false;
             }
-            else
-            { // if the config does not exist fail closed. 
+            catch
+            { // if the config is of unexpected type fail closed.
                 return false;
             }
         }
