@@ -1,9 +1,14 @@
-﻿using System.Collections;
+﻿#if DEBUG
+#define ENABLE_PROFILER
+#endif
+
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using FairAI;
 using GameNetcodeStuff;
+using Unity.Profiling;
 using UnityEngine;
 
 internal class TurretAIPatch

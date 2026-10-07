@@ -3,7 +3,7 @@ using BepInEx.Configuration;
 namespace FairAI.Configuration
 {
     /// <summary>
-    /// Per-enemy settings. Holds the ConfigEntry references (not copied values),
+    /// Per-enemy settings. Holds the ConfigEntry references ("cache"),
     /// so changes made at runtime (e.g. through LethalConfig) are seen immediately.
     /// </summary>
     internal sealed class MobSettings
